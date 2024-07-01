@@ -8,9 +8,9 @@ app.use(bodyParser.json());
 
 // CORS middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 
@@ -29,11 +29,11 @@ interface Plugin {
 
 class ChatbotPlugin implements Plugin {
   execute(message: Message) {
-    if (message.message.includes("hello")) {
+    if (message.message.toLowerCase().includes("hello")) {
       messages.push({
         message: "Hello! How can I assist you today?",
         user: "Chatbot",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   }
@@ -43,11 +43,11 @@ const plugins: Plugin[] = [new ChatbotPlugin()];
 
 // Authentication middleware
 const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers['authorization'];
-  if (token === 'Bearer valid-token') {
+  const token = req.headers["authorization"];
+  if (token === "Bearer valid-token") {
     next();
   } else {
-    res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: "Unauthorized" });
   }
 };
 
@@ -71,9 +71,9 @@ app.post("/message", authenticate, (req: Request, res: Response) => {
   messages.push(newMessage);
 
   // Execute plugins
-  plugins.forEach(plugin => plugin.execute(newMessage));
+  plugins.forEach((plugin) => plugin.execute(newMessage));
 
-  res.status(200).json(newMessage);
+  res.status(201).json(newMessage);
 });
 
 // Error handling middleware
