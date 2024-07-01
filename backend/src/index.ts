@@ -9,8 +9,11 @@ app.use(bodyParser.json());
 // CORS middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   next();
 });
 
@@ -73,7 +76,7 @@ app.post("/message", authenticate, (req: Request, res: Response) => {
   // Execute plugins
   plugins.forEach((plugin) => plugin.execute(newMessage));
 
-  res.status(201).json(newMessage);
+  res.status(201).json({ message: newMessage.message, status: "sent" });
 });
 
 // Error handling middleware

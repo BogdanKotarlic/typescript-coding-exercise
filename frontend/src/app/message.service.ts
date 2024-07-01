@@ -7,30 +7,40 @@ export class MessageService {
   messages$ = this.messagesSubject.asObservable();
 
   async all() {
-    const res = await fetch('http://localhost:3000/messages');
-    const data = await res.json();
-    const messages = data.messages.map(
-      (message: any) => new Message(message.message, 'received')
-    );
-    this.messagesSubject.next(messages);
+    try {
+      const res = await fetch('http://localhost:3000/messages');
+      if (!res.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+      const data = await res.json();
+      const messages = data.messages.map(
+        (message: any) => new Message(message.message, 'received')
+      );
+      this.messagesSubject.next(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
   }
 
   async add(message: Message) {
-    const res = await fetch('http://localhost:3000/message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer valid-token',
-      },
-      body: JSON.stringify({ message: message.text, user: 'User1' }),
-    });
+    try {
+      const res = await fetch('http://localhost:3000/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer valid-token',
+        },
+        body: JSON.stringify({ message: message.text, user: 'User1' }),
+      });
 
-    const data = await res.json();
-    const currentMessages = this.messagesSubject.value;
-    this.messagesSubject.next([
-      ...currentMessages,
-      new Message(data.message, data.status),
-    ]);
+      if (!res.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      await this.all();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   }
 }
 

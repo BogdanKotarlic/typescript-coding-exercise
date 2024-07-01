@@ -4,31 +4,27 @@ import { NgClass, CommonModule } from '@angular/common';
 @Component({
   selector: 'app-message',
   template: `
-    <div class="message" [ngClass]="message.status">
-      <span>{{ message.text }}</span>
-      <span class="status">{{ message.status }}</span>
+    <div
+      class="flex justify-between items-center p-4 border-b border-gray-300"
+      [ngClass]="{
+        'bg-green-100': message.status === 'sent',
+        'bg-blue-100': message.status === 'received'
+      }"
+    >
+      <div class="text-gray-700">
+        {{ message.text }}
+      </div>
+      <div
+        class="text-sm font-semibold"
+        [ngClass]="{
+          'text-green-600': message.status === 'sent',
+          'text-blue-600': message.status === 'received'
+        }"
+      >
+        {{ message.status }}
+      </div>
     </div>
   `,
-  styles: [
-    `
-      .message {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        border-bottom: 1px solid #ccc;
-      }
-      .status {
-        font-size: 0.8em;
-        color: gray;
-      }
-      .sent {
-        color: green;
-      }
-      .received {
-        color: blue;
-      }
-    `,
-  ],
   standalone: true,
   imports: [NgClass, CommonModule],
 })

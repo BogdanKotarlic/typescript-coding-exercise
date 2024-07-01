@@ -3,6 +3,7 @@ import { ChatComponent } from './chat.component';
 import { LoginComponent } from './login.component';
 
 export const routes: Routes = [
-  { path: '', component: ChatComponent },
-  { path: 'login', component: LoginComponent }
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'chat', component: ChatComponent },
 ];
