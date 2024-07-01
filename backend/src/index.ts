@@ -6,6 +6,14 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 
+// CORS middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 interface Message {
   message: string;
   user: string;
@@ -14,13 +22,42 @@ interface Message {
 
 let messages: Message[] = [];
 
+// Plugin system
+interface Plugin {
+  execute(message: Message): void;
+}
+
+class ChatbotPlugin implements Plugin {
+  execute(message: Message) {
+    if (message.message.includes("hello")) {
+      messages.push({
+        message: "Hello! How can I assist you today?",
+        user: "Chatbot",
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+}
+
+const plugins: Plugin[] = [new ChatbotPlugin()];
+
+// Authentication middleware
+const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers['authorization'];
+  if (token === 'Bearer valid-token') {
+    next();
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+};
+
 // Get all messages
 app.get("/messages", (req: Request, res: Response) => {
   res.json({ messages });
 });
 
 // Send a new message
-app.post("/message", (req: Request, res: Response) => {
+app.post("/message", authenticate, (req: Request, res: Response) => {
   const { message, user } = req.body;
   if (!message || !user) {
     return res.status(400).json({ error: "Invalid input" });
@@ -32,6 +69,10 @@ app.post("/message", (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   };
   messages.push(newMessage);
+
+  // Execute plugins
+  plugins.forEach(plugin => plugin.execute(newMessage));
+
   res.status(200).json(newMessage);
 });
 
